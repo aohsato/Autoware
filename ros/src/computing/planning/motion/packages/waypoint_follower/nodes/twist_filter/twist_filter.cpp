@@ -33,6 +33,7 @@
 
 #include <iostream>
 
+#include "autoware_msgs/ControlCommandStamped.h"
 #include "autoware_msgs/ConfigTwistFilter.h"
 
 namespace {
@@ -61,6 +62,7 @@ public:
 
 //Publisher
 ros::Publisher g_twist_pub;
+ros::Publisher g_ctrl_pub;
 double g_lateral_accel_limit = 5.0;
 double g_lowpass_gain_linear_x = 0.0;
 double g_lowpass_gain_angular_z = 0.0;
@@ -118,6 +120,24 @@ void TwistCmdCallback(const geometry_msgs::TwistStampedConstPtr &msg)
   g_twist_pub.publish(tp);
 
 }
+
+void CtrlCmdCallback(const autoware_msgs::ControlCommandStampedConstPtr &msg)
+{
+
+  double v = msg->cmd.linear_velocity;
+  double a = msg->cmd.steering_angle;
+
+  // update kalman filter
+  g_kf.predict();
+  v = g_kf.update(v);
+
+  autoware_msgs::ControlCommandStamped ccs;
+  ccs.header = msg->header;
+  ccs.cmd.linear_velocity = v;
+  ccs.cmd.steering_angle = a;
+
+  g_ctrl_pub.publish(ccs);
+}
 } // namespace
 
 int main(int argc, char **argv)
@@ -128,8 +148,10 @@ int main(int argc, char **argv)
     ros::NodeHandle private_nh("~");
 
     ros::Subscriber twist_sub = nh.subscribe("twist_raw", 1, TwistCmdCallback);
+    ros::Subscriber ctrl_sub = nh.subscribe("ctrl_raw", 1, CtrlCmdCallback);
     ros::Subscriber config_sub = nh.subscribe("config/twist_filter", 10, configCallback);
     g_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("twist_cmd", 1000);
+    g_ctrl_pub = nh.advertise<autoware_msgs::ControlCommandStamped>("ctrl_cmd", 1000);
 
     ros::spin();
     return 0;
