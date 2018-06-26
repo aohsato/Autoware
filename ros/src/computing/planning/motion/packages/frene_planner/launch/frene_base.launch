@@ -1,0 +1,148 @@
+<launch>
+	<!-- ARGUMENTS -->
+	<arg name="group_name" default="velocity_keeping" />
+	<arg name="frene_mode" default="0" />
+	<arg name="timeMinSec"	       default="2.5"	/> 
+	<arg name="timeMaxSec"	       default="2.6"	/> 
+	<arg name="timeDeltaSec"	       default="0.5"	 /> 		
+	<arg name="desiredLatPositionMeter"      default="0"	 /> 
+	<arg name="desiredLatPositionMinusMeter"    default="-3" /> 
+	<arg name="desiredLatPositionPlusMeter"     default="3"	 /> 
+	<arg name="desiredLatPositionDeltaMeter"    default="0.1"/> 
+	<arg name="desiredSpeedKmPerHour"      default="20"	 /> 
+	<arg name="desiredSpeedMinusKmPerHour"     default="-18" /> 
+	<arg name="desiredSpeedPlusKmPerHour"      default="1"	 /> 
+	<arg name="desiredSpeedDeltaKmPerHour"    default="2"	 /> 
+	<arg name="roadMarginRight"       default="4.5"	 />	
+	<arg name="roadMarginLeft"        default="0.5"	 />	
+	<arg name="maxCentrifugalForce"        default="1.5"	 />	
+	<arg name="maxAcceleration"        default="2.0"	 />
+	<arg name="maxCurvature"        default="20.0"	 />
+	<arg name="kjlong"    default="1"	     />
+	<arg name="ktlong"    default="1"	     />
+	<arg name="kplong"    default="200"    />
+	<arg name="kjlat"    default="1"	     />
+	<arg name="ktlat"    default="1"	     />
+	<arg name="kplat"    default="100"     />
+	<arg name="klong"    default="1"	     />
+	<arg name="klat"    default="1"	     />
+	<arg name="useOccupancyGridMap"    default="false" />
+	<arg name="collisionScalingFactorGammaMin"    default="1.0"	    />		
+	<arg name="collisionScalingFactorGammaMax"    default="1.0"	    />		
+	<arg name="collisionScalingFactorVMin"    default="0.0"	    />		
+	<arg name="collisionScalingFactorVMax"    default="100.0"	    />	
+	<arg name="carLength"    default="1.0"	     />
+	<arg name="carWidth"    default="1.0"	     />
+	<arg name="desiredLongSpeedKmPerHour"    default="1.0"	     />
+	<arg name="desiredLongPositionMeter"    default="0"	     />
+	<arg name="currentPoseTopicName" default="/filtered_ndt_current_pose"/>
+	<arg name="vehicleSpeedTopicName" default="/vehicle_speed"/>
+	
+	<node pkg="frene_planner" type="lane_following" name="$(arg group_name)">
+	        
+		<!-- general settings for frenet planner-->	      
+		<param name="targetLaneGlobalTopicName" value="/target_lane_global"  />		
+		<param name="samplingTimeHz"   value="10"	      type="int"/> 
+		<param name="queSize"	       value="10"	      type="int"/> 
+		<param name="mapFrameName" value="/map" />	
+	        <param name="useOccupancyGridMap"    value="$(arg useOccupancyGridMap)"            type="bool"/> 
+		<param name="doTransform"    value="false"            type="bool"/> 
+		
+		<!-- topic names -->
+		<param name="vehicleSpeedTopicName" value="$(arg vehicleSpeedTopicName)" />
+		<param name="vehicleAccelerationTopicName" value="/vehicle_acceleration" />
+		<param name="trajectoryArrayTopicName" value="trajectory_array_cartesian" />	
+		<param name="currentPoseTopicName" value="$(arg currentPoseTopicName)" />
+		<param name="previousOptimalTrajectoryTopicName" value="/trajectory_array_cartesian" />			
+		<param name="trajectoryMarkTopicName" value="trajectory_mark" />	
+		<param name="trajectoryMarkFilter1TopicName" value="trajectory_mark_filter1" />	
+		<param name="trajectoryMarkFilter2TopicName" value="trajectory_mark_filter2" />	
+		<param name="trajectoryMarkFilter3TopicName" value="trajectory_mark_filter3" />	
+		<param name="optimalTrajectoryMarkTopicName" value="optimal_trajectory_mark" />	
+		<param name="targetLaneInterpVehicleMarkTopicName" value="target_lane_interp_vehicle_mark" />			
+		<param name="previousOptimalTrajectoryMarkTopicName" value="previous_optimal_trajectory_mark" />	
+		<param name="blindCornerMarkTopicName" value="blind_corner_mark" />	
+		<param name="desiredStateTopicName" value="desired_state" />	
+					
+		<!-- freneMode = 0(velocity keeping),  1(following),  2(stopping) -->
+		<param name="freneMode"       value="$(arg frene_mode)"	      type="int"/>	
+		
+		<!-- for velocity keeping -->		
+		<!-- some parameters for general settings -->
+		<param name="resamplingThreshold"       value="1"	      type="double"/>			
+		<param name="arcLengthTickMeter"       value="0.2"	      type="double"/>	
+		<param name="resamplingTickTime"       value="0.1"	      type="double"/>	
+		<param name="polyTickTime"       value="0.1"	      type="double"/>	
+		<param name="usePreviousTrajectoryForInit"       value="true"	      type="bool"/>	
+		<param name="isDrawTrajectory"       value="true"	      type="bool"/>	
+		
+		<!-- parameters to define candidate trajectories -->
+		<param name="timeMinSec"	       value="$(arg timeMinSec)"	      type="double"/> 
+		<param name="timeMaxSec"	       value="$(arg timeMaxSec)"	      type="double"/> 
+		<param name="timeDeltaSec"	       value="$(arg timeDeltaSec)"	      type="double"/> 		
+		<param name="desiredLatPositionMeter"      value="$(arg desiredLatPositionMeter)"	      type="double"/> 
+		<param name="desiredLatPositionMinusMeter"    value="$(arg desiredLatPositionMinusMeter)"	      type="double"/> 
+		<param name="desiredLatPositionPlusMeter"     value="$(arg desiredLatPositionPlusMeter)"	      type="double"/> 
+		<param name="desiredLatPositionDeltaMeter"    value="$(arg desiredLatPositionDeltaMeter)"	      type="double"/> 
+		<param name="desiredSpeedKmPerHour"      value="$(arg desiredSpeedKmPerHour)"	      type="double"/> 
+		<param name="desiredSpeedMinusKmPerHour"     value="$(arg desiredSpeedMinusKmPerHour)"      type="double"/> 
+		<param name="desiredSpeedPlusKmPerHour"      value="$(arg desiredSpeedPlusKmPerHour)"	      type="double"/> 
+		<param name="desiredSpeedDeltaKmPerHour"    value="$(arg desiredSpeedDeltaKmPerHour)"	      type="double"/> 
+		
+		<!-- weights for computing cost -->
+		<param name="kjlong"    value="$(arg kjlong)"	      type="double"/> 
+		<param name="ktlong"    value="$(arg ktlong)"	      type="double"/> 
+		<param name="kplong"    value="$(arg kplong)"	      type="double"/> 
+		<param name="kjlat"    value="$(arg kjlat)"	      type="double"/> 
+		<param name="ktlat"    value="$(arg ktlat)"	      type="double"/> 
+		<param name="kplat"    value="$(arg kplat)"	      type="double"/> 
+		<param name="klong"    value="$(arg klong)"	      type="double"/> 
+		<param name="klat"    value="$(arg klat)"	      type="double"/> 
+		
+		<param name="resamplingThreshold"       value="1"	      type="double"/>			
+		<param name="arcLengthTickMeter"       value="0.2"	      type="double"/>	
+		
+		<!-- limiters to select safe trajectories -->
+		<param name="roadMarginRight"       value="$(arg roadMarginRight)"	      type="double"/>	
+		<param name="roadMarginLeft"        value="$(arg roadMarginLeft)"	      type="double"/>	
+		<param name="maxCentrifugalForce"   value="$(arg maxCentrifugalForce)"	      type="double"/>			
+		<param name="maxAcceleration"       value="$(arg maxAcceleration)"	      type="double"/>			
+		<param name="maxCurvature"          value="$(arg maxCurvature)"		      type="double"/>
+
+		<!-- to stop vehicle at the specified distance -->
+		<param name="stopCountMax1"       value="10000000"	      type="double"/>	
+		<param name="stopCountMax2"       value="10000000"	      type="double"/>	
+		<param name="stopPosition1"       value="300000"	      type="double"/>	
+		<param name="stopPosition2"       value="500000"	      type="double"/>	
+		<param name="stopSpeedKmph"       value="2"	      type="double"/>	
+
+		<!-- for risk evaluation from blind corner -->		
+		<param name="useSpeedModel"       value="false"	      type="bool"/>			
+		<param name="wallTxtFileName" value="$(find frene_planner)/launch/processed-vector-map/tctsls/wall_fence_shift.txt" />
+		<param name="paramSpeedModelVoKmph"       value="20"	      type="double"/>			
+		<param name="paramSpeedModelAd"       value="0.5"	      type="double"/>			
+		<param name="paramSpeedModelAmax"       value="0.8"	      type="double"/>			
+		<param name="paramSpeedModelDy"       value="0.0"	      type="double"/>			
+		<param name="paramSpeedModelDv"       value="2.0"	      type="double"/>	
+
+
+		<!-- for stopping  -->
+                <param name="desiredLongPositionMeter"      value="$(arg desiredLongPositionMeter)"       type="double"/>                 
+                <param name="desiredLongSpeedKmPerHour"      value="$(arg desiredLongSpeedKmPerHour)"       type="double"/>                 
+		<!-- for stopping, following  -->
+		<param name="desiredLongPositionMinusMeter"    value="-0.1"           type="double"/> 
+                <param name="desiredLongPositionPlusMeter"     value="0.1"            type="double"/> 
+                <param name="desiredLongPositionDeltaMeter"    value="1.0"            type="double"/> 
+
+
+		<!-- for collision avoidance  -->		
+		<param name="carLength"    value="$(arg carLength)"  type = "double" />		
+		<param name="carWidth"    value="$(arg carWidth)"  type = "double" />		
+		<param name="collisionScalingFactorGammaMin"    value="$(arg collisionScalingFactorGammaMin)"  type = "double" />		
+		<param name="collisionScalingFactorGammaMax"    value="$(arg collisionScalingFactorGammaMax)"  type = "double" />		
+		<param name="collisionScalingFactorVMin"    value="$(arg collisionScalingFactorVMin)"	     type = "double" />		
+		<param name="collisionScalingFactorVMax"    value="$(arg collisionScalingFactorVMax)"	     type = "double" />	
+					
+	</node>
+
+</launch>

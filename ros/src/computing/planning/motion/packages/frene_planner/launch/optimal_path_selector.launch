@@ -1,0 +1,33 @@
+<launch>
+	<arg name="local_lane_topic_out" default="/plan" />
+	<arg name="trajectorySmoothStoppingLength" default="5.0" />
+	<arg name="trajectorySmoothStoppingNumOfPoints" default="1000" />
+	<arg name="trajectorySmoothStoppingSmoothnessFactor" default="2.0" />
+	<arg name="thresholdDesiredLongPosition" default="5.0" />
+
+	<arg name="samplingTimeHz" default="100" />
+	<arg name="queSize" default="10" />
+	<arg name="optimalTrajectoryVelocityKeepingTopicName" default="/velocity_keeping/trajectory_array_cartesian" />
+	<arg name="optimalTrajectoryFollowingTopicName" default="/stopping/trajectory_array_cartesian" />
+	<arg name="optimalTrajectoryToMPCTopicName" default="/optimal_path" />
+	<arg name="optimalTrajectoryToFreneNodesTopicName" default="/trajectory_array_cartesian" />
+	<arg name="previousOptimalTrajectoryTopicName" default="/trajectory_array_cartesian" />
+
+	<group ns="frene_planner_core">
+		<node pkg="frene_planner" type="optimal_path_selector" name="optimal_path_selector1">
+			<param name="samplingTimeHz" value="$(arg samplingTimeHz)" type="int"/>
+			<param name="queSize" value="$(arg queSize)" type="int"/>
+			<param name="optimalTrajectoryVelocityKeepingTopicName" value="$(arg optimalTrajectoryVelocityKeepingTopicName)" />
+			<param name="optimalTrajectoryFollowingTopicName" value="$(arg optimalTrajectoryFollowingTopicName)" />
+			<param name="optimalTrajectoryToMPCTopicName" value="$(arg optimalTrajectoryToMPCTopicName)" />
+			<param name="optimalTrajectoryToTrajectoryTrackerTopicName" value="$(arg local_lane_topic_out)" />
+			<param name="optimalTrajectoryToFreneNodesTopicName" value="$(arg optimalTrajectoryToFreneNodesTopicName)" />
+			<param name="previousOptimalTrajectoryTopicName" value="$(arg previousOptimalTrajectoryTopicName)" />
+
+			<param name="trajectorySmoothStoppingLength" value="$(arg trajectorySmoothStoppingLength)" type="double"/>
+			<param name="trajectorySmoothStoppingNumOfPoints" value="$(arg trajectorySmoothStoppingNumOfPoints)" type="double"/>
+			<param name="trajectorySmoothStoppingSmoothnessFactor" value="$(arg trajectorySmoothStoppingSmoothnessFactor)" type="double"/>
+			<param name="thresholdDesiredLongPosition" value="$(arg thresholdDesiredLongPosition)" type="double"/>
+		</node>
+	</group>
+</launch>

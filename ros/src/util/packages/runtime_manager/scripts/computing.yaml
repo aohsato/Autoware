@@ -610,6 +610,125 @@ subs :
         desc : lattice_twist_convert desc sample
         cmd  : rosrun lattice_planner lattice_twist_convert
 
+    - name: frene_planner
+      subs:
+      - name: map_server
+        cmd: roslaunch map_server map_server.launch
+        param: map_server
+        gui:
+          map_yaml_file: { border: 4, flags: [ all ] }
+          pcd_file: { border: 4, flags: [ all ] }
+
+      - name: path_lane_converter
+        cmd: roslaunch frene_planner path_lane_converter.launch
+        param: path_lane_converter
+        gui:
+          global_lane_topic_in: { border: 4, flags: [ all, nl, hline ], prop: 1 }
+          laneTopicName: { border: 4, flags: [ all, nl ], prop: 1 }
+          samplingTimeHz: { border: 4, flags: [ all, nl ] }
+          queSize: { border: 4, flags: [ all, nl ] }
+
+      - name: velocity_keeping
+        cmd: roslaunch frene_planner velocity_keeping.launch
+        param: velocity_keeping
+        gui:
+          currentPoseTopicName: { border: 4, flags: [ all, nl ], prop: 1 }
+          vehicleSpeedTopicName: { border: 4, flags: [ all, nl, hline ], prop: 1 }
+
+          timeMinSec: { border: 4, flags: [ all, nl ] }
+          timeMaxSec: { border: 4, flags: [ all, nl ] }
+          timeDeltaSec: { border: 4, flags: [ all, nl ] }
+          desiredLatPositionMeter: { border: 4, flags: [ all, nl ] }
+          desiredLatPositionMinusMeter: { border: 4, flags: [ all, nl ] }
+          desiredLatPositionPlusMeter: { border: 4, flags: [ all, nl ] }
+          desiredLatPositionDeltaMeter: { border: 4, flags: [ all, nl ] }
+          desiredSpeedKmPerHour: { border: 4, flags: [ all, nl, hline ] }
+
+          desiredSpeedMinusKmPerHour: { border: 4, flags: [ all, nl ] }
+          desiredSpeedPlusKmPerHour: { border: 4, flags: [ all, nl ] }
+          desiredSpeedDeltaKmPerHour: { border: 4, flags: [ all, nl, hline ] }
+
+          roadMarginRight: { border: 4, flags: [ all, nl ] }
+          roadMarginLeft: { border: 4, flags: [ all, nl ] }
+          maxCentrifugalForce: { border: 4, flags: [ all, nl ] }
+          maxAcceleration: { border: 4, flags: [ all, nl ] }
+          maxCurvature: { border: 4, flags: [ all, nl, hline ] }
+
+          kjlong: { border: 4, flags: [ all, nl ] }
+          ktlong: { border: 4, flags: [ all, nl ] }
+          kplong: { border: 4, flags: [ all, nl ] }
+          kjlat: { border: 4, flags: [ all, nl ] }
+          ktlat: { border: 4, flags: [ all, nl ] }
+          kplat: { border: 4, flags: [ all, nl ] }
+          klong: { border: 4, flags: [ all, nl ] }
+          klat: { border: 4, flags: [ all, nl ] }
+          useOccupancyGridMap: { border: 4, flags: [ all, nl, hline ] }
+
+          collisionScalingFactorGammaMin: { border: 4, flags: [ all, nl ] }
+          collisionScalingFactorGammaMax: { border: 4, flags: [ all, nl ] }
+          collisionScalingFactorVMin: { border: 4, flags: [ all, nl ] }
+          collisionScalingFactorVMax: { border: 4, flags: [ all, nl ] }
+          carLength: { border: 4, flags: [ all, nl ] }
+          carWidth: { border: 4, flags: [ all, nl ] }
+
+      - name: stopping
+        cmd: roslaunch frene_planner stopping.launch
+        param: stopping
+        gui:
+          currentPoseTopicName: { border: 4, flags: [ all, nl ], prop: 1 }
+          vehicleSpeedTopicName: { border: 4, flags: [ all, nl, hline ], prop: 1 }
+
+          timeMinSec: { border: 4, flags: [ all, nl ] }
+          timeMaxSec: { border: 4, flags: [ all, nl ] }
+          timeDeltaSec: { border: 4, flags: [ all, nl ] }
+          desiredLatPositionMeter: { border: 4, flags: [ all, nl ] }
+          desiredLatPositionMinusMeter: { border: 4, flags: [ all, nl ] }
+          desiredLatPositionPlusMeter: { border: 4, flags: [ all, nl ] }
+          desiredLatPositionDeltaMeter: { border: 4, flags: [ all, nl ] }
+          desiredSpeedKmPerHour: { border: 4, flags: [ all, nl, hline ] }
+
+          desiredLongPositionMeter: { border: 4, flags: [ all, nl ] }
+
+          roadMarginRight: { border: 4, flags: [ all, nl ] }
+          roadMarginLeft: { border: 4, flags: [ all, nl ] }
+          maxCentrifugalForce: { border: 4, flags: [ all, nl ] }
+          maxAcceleration: { border: 4, flags: [ all, nl ] }
+          maxCurvature: { border: 4, flags: [ all, nl, hline ] }
+
+          kjlong: { border: 4, flags: [ all, nl ] }
+          ktlong: { border: 4, flags: [ all, nl ] }
+          kplong: { border: 4, flags: [ all, nl ] }
+          kjlat: { border: 4, flags: [ all, nl ] }
+          ktlat: { border: 4, flags: [ all, nl ] }
+          kplat: { border: 4, flags: [ all, nl ] }
+          klong: { border: 4, flags: [ all, nl ] }
+          klat: { border: 4, flags: [ all, nl ] }
+          useOccupancyGridMap: { border: 4, flags: [ all, nl, hline ] }
+
+          collisionScalingFactorGammaMin: { border: 4, flags: [ all, nl ] }
+          collisionScalingFactorGammaMax: { border: 4, flags: [ all, nl ] }
+          collisionScalingFactorVMin: { border: 4, flags: [ all, nl ] }
+          collisionScalingFactorVMax: { border: 4, flags: [ all, nl ] }
+          carLength: { border: 4, flags: [ all, nl ] }
+          carWidth: { border: 4, flags: [ all, nl ] }
+
+      - name: optimal_path_selector
+        cmd: roslaunch frene_planner optimal_path_selector.launch
+        param: optimal_path_selector
+        gui:
+          local_lane_topic_out: { border: 4, flags: [ all, nl, hline ], prop: 1 }
+          trajectorySmoothStoppingLength: { border: 4, flags: [ all, nl ] }
+          trajectorySmoothStoppingNumOfPoints: { border: 4, flags: [ all, nl ] }
+          trajectorySmoothStoppingSmoothnessFactor: { border: 4, flags: [ all, nl ] }
+          thresholdDesiredLongPosition: { border: 4, flags: [ all, nl, hline ] }
+          samplingTimeHz: { border: 4, flags: [ all, nl ] }
+          queSize: { border: 4, flags: [ all, nl ] }
+          optimalTrajectoryVelocityKeepingTopicName: { border: 4, flags: [ all, nl ], prop: 1 }
+          optimalTrajectoryFollowingTopicName: { border: 4, flags: [ all, nl ], prop: 1 }
+          optimalTrajectoryToMPCTopicName: { border: 4, flags: [ all, nl ], prop: 1 }
+          optimalTrajectoryToFreneNodesTopicName: { border: 4, flags: [ all, nl ], prop: 1 }
+          previousOptimalTrajectoryTopicName: { border: 4, flags: [ all, nl ], prop: 1 }
+
     - name : waypoint_maker
       desc : waypoint_maker desc sample
       subs :
@@ -1080,7 +1199,7 @@ params :
       cmd_param :
         dash        : ''
         delim       : ':='
-        
+
   - name  : kf_contour_tracker
     vars  :
     - name : tracking_type
@@ -4210,3 +4329,438 @@ params :
       cmd_param :
         dash        : ''
         delim       : ':='
+
+  - name: map_server
+    vars:
+    - name: map_yaml_file
+      label: map_yaml_file
+      kind: path
+      v: ''
+      cmd_param: { dash: '', delim: ':=', must: True }
+    - name: pcd_file
+      label: pcd_file
+      kind: path
+      v: ''
+      cmd_param: { dash: '', delim: ':=', must: True }
+
+  - name: path_lane_converter
+    vars:
+    - name: global_lane_topic_in
+      label: global_lane_topic_in
+      kind: str
+      v: /base_waypoints
+      cmd_param: { dash: '', delim: ':=' }
+    - name: laneTopicName
+      label: laneTopicName
+      kind: str
+      v: /target_lane_global
+      cmd_param: { dash: '', delim: ':=' }
+    - name: samplingTimeHz
+      label: samplingTimeHz
+      kind: num
+      v: 100
+      cmd_param: { dash: '', delim: ':=' }
+    - name: queSize
+      label: queSize
+      kind: num
+      v: 10
+      cmd_param: { dash: '', delim: ':=' }
+
+  - name: velocity_keeping
+    vars:
+    - name: currentPoseTopicName
+      label: currentPoseTopicName
+      kind: str
+      v: /current_pose
+      cmd_param: { dash: '', delim: ':=' }
+    - name: vehicleSpeedTopicName
+      label: vehicleSpeedTopicName
+      kind: str
+      v: /current_velocity
+      cmd_param: { dash: '', delim: ':=' }
+
+    - name: timeMinSec
+      label: timeMinSec
+      kind: num
+      v: 2.5
+      cmd_param: { dash: '', delim: ':=' }
+    - name: timeMaxSec
+      label: timeMaxSec
+      kind: num
+      v: 2.6
+      cmd_param: { dash: '', delim: ':=' }
+    - name: timeDeltaSec
+      label: timeDeltaSec
+      kind: num
+      v: 0.5
+      cmd_param: { dash: '', delim: ':=' }
+    - name: desiredLatPositionMeter
+      label: desiredLatPositionMeter
+      kind: num
+      v: 0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: desiredLatPositionMinusMeter
+      label: desiredLatPositionMinusMeter
+      kind: num
+      v: -2
+      cmd_param: { dash: '', delim: ':=' }
+    - name: desiredLatPositionPlusMeter
+      label: desiredLatPositionPlusMeter
+      kind: num
+      v: 2
+      cmd_param: { dash: '', delim: ':=' }
+    - name: desiredLatPositionDeltaMeter
+      label: desiredLatPositionDeltaMeter
+      kind: num
+      v: 0.1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: desiredSpeedKmPerHour
+      label: desiredSpeedKmPerHour
+      kind: num
+      v: 20
+      cmd_param: { dash: '', delim: ':=' }
+
+    - name: desiredSpeedMinusKmPerHour
+      label: desiredSpeedMinusKmPerHour
+      kind: num
+      v: -18
+      cmd_param: { dash: '', delim: ':=' }
+    - name: desiredSpeedPlusKmPerHour
+      label: desiredSpeedPlusKmPerHour
+      kind: num
+      v: 1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: desiredSpeedDeltaKmPerHour
+      label: desiredSpeedDeltaKmPerHour
+      kind: num
+      v: 2
+      cmd_param: { dash: '', delim: ':=' }
+
+    - name: roadMarginRight
+      label: roadMarginRight
+      kind: num
+      v: 4.5
+      cmd_param: { dash: '', delim: ':=' }
+    - name: roadMarginLeft
+      label: roadMarginLeft
+      kind: num
+      v: 4.5
+      cmd_param: { dash: '', delim: ':=' }
+    - name: maxCentrifugalForce
+      label: maxCentrifugalForce
+      kind: num
+      v: 0.6
+      cmd_param: { dash: '', delim: ':=' }
+    - name: maxAcceleration
+      label: maxAcceleration
+      kind: num
+      v: 2.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: maxCurvature
+      label: maxCurvature
+      kind: num
+      v: 1.0
+      cmd_param: { dash: '', delim: ':=' }
+
+    - name: kjlong
+      label: kjlong
+      kind: num
+      v: 1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: ktlong
+      label: ktlong
+      kind: num
+      v: 1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: kplong
+      label: kplong
+      kind: num
+      v: 100
+      cmd_param: { dash: '', delim: ':=' }
+    - name: kjlat
+      label: kjlat
+      kind: num
+      v: 1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: ktlat
+      label: ktlat
+      kind: num
+      v: 1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: kplat
+      label: kplat
+      kind: num
+      v: 200
+      cmd_param: { dash: '', delim: ':=' }
+    - name: klong
+      label: klong
+      kind: num
+      v: 1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: klat
+      label: klat
+      kind: num
+      v: 1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: useOccupancyGridMap
+      label: useOccupancyGridMap
+      kind: checkbox
+      v: True
+      cmd_param: { dash: '', delim: ':=' }
+
+    - name: collisionScalingFactorGammaMin
+      label: collisionScalingFactorGammaMin
+      kind: num
+      v: 1.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: collisionScalingFactorGammaMax
+      label: collisionScalingFactorGammaMax
+      kind: num
+      v: 1.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: collisionScalingFactorVMin
+      label: collisionScalingFactorVMin
+      kind: num
+      v: 0.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: collisionScalingFactorVMax
+      label: collisionScalingFactorVMax
+      kind: num
+      v: 5.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: carLength
+      label: carLength
+      kind: num
+      v: 2.395
+      cmd_param: { dash: '', delim: ':=' }
+    - name: carWidth
+      label: carWidth
+      kind: num
+      v: 1.095
+      cmd_param: { dash: '', delim: ':=' }
+
+  - name: stopping
+    vars:
+    - name: currentPoseTopicName
+      label: currentPoseTopicName
+      kind: str
+      v: /current_pose
+      cmd_param: { dash: '', delim: ':=' }
+    - name: vehicleSpeedTopicName
+      label: vehicleSpeedTopicName
+      kind: str
+      v: /current_velocity
+      cmd_param: { dash: '', delim: ':=' }
+
+    - name: timeMinSec
+      label: timeMinSec
+      kind: num
+      v: 4.5
+      cmd_param: { dash: '', delim: ':=' }
+    - name: timeMaxSec
+      label: timeMaxSec
+      kind: num
+      v: 10.6
+      cmd_param: { dash: '', delim: ':=' }
+    - name: timeDeltaSec
+      label: timeDeltaSec
+      kind: num
+      v: 0.5
+      cmd_param: { dash: '', delim: ':=' }
+    - name: desiredLatPositionMeter
+      label: desiredLatPositionMeter
+      kind: num
+      v: 2.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: desiredLatPositionMinusMeter
+      label: desiredLatPositionMinusMeter
+      kind: num
+      v: -2.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: desiredLatPositionPlusMeter
+      label: desiredLatPositionPlusMeter
+      kind: num
+      v: 0.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: desiredLatPositionDeltaMeter
+      label: desiredLatPositionDeltaMeter
+      kind: num
+      v: 0.1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: desiredSpeedKmPerHour
+      label: desiredSpeedKmPerHour
+      kind: num
+      v: 7.2
+      cmd_param: { dash: '', delim: ':=' }
+
+    - name: desiredLongPositionMeter
+      label: desiredLongPositionMeter
+      kind: num
+      v: 20.0
+      cmd_param: { dash: '', delim: ':=' }
+
+    - name: roadMarginRight
+      label: roadMarginRight
+      kind: num
+      v: 4.5
+      cmd_param: { dash: '', delim: ':=' }
+    - name: roadMarginLeft
+      label: roadMarginLeft
+      kind: num
+      v: 4.5
+      cmd_param: { dash: '', delim: ':=' }
+    - name: maxCentrifugalForce
+      label: maxCentrifugalForce
+      kind: num
+      v: 0.6
+      cmd_param: { dash: '', delim: ':=' }
+    - name: maxAcceleration
+      label: maxAcceleration
+      kind: num
+      v: 2.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: maxCurvature
+      label: maxCurvature
+      kind: num
+      v: 1.0
+      cmd_param: { dash: '', delim: ':=' }
+
+    - name: kjlong
+      label: kjlong
+      kind: num
+      v: 1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: ktlong
+      label: ktlong
+      kind: num
+      v: 1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: kplong
+      label: kplong
+      kind: num
+      v: 100
+      cmd_param: { dash: '', delim: ':=' }
+    - name: kjlat
+      label: kjlat
+      kind: num
+      v: 210
+      cmd_param: { dash: '', delim: ':=' }
+    - name: ktlat
+      label: ktlat
+      kind: num
+      v: 1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: kplat
+      label: kplat
+      kind: num
+      v: 800
+      cmd_param: { dash: '', delim: ':=' }
+    - name: klong
+      label: klong
+      kind: num
+      v: 1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: klat
+      label: klat
+      kind: num
+      v: 1
+      cmd_param: { dash: '', delim: ':=' }
+    - name: useOccupancyGridMap
+      label: useOccupancyGridMap
+      kind: checkbox
+      v: True
+      cmd_param: { dash: '', delim: ':=' }
+
+    - name: collisionScalingFactorGammaMin
+      label: collisionScalingFactorGammaMin
+      kind: num
+      v: 1.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: collisionScalingFactorGammaMax
+      label: collisionScalingFactorGammaMax
+      kind: num
+      v: 1.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: collisionScalingFactorVMin
+      label: collisionScalingFactorVMin
+      kind: num
+      v: 0.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: collisionScalingFactorVMax
+      label: collisionScalingFactorVMax
+      kind: num
+      v: 5.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: carLength
+      label: carLength
+      kind: num
+      v: 2.395
+      cmd_param: { dash: '', delim: ':=' }
+    - name: carWidth
+      label: carWidth
+      kind: num
+      v: 1.095
+      cmd_param: { dash: '', delim: ':=' }
+
+  - name: optimal_path_selector
+    vars:
+    - name: local_lane_topic_out
+      label: local_lane_topic_out
+      kind: str
+      v: /final_waypoints
+      cmd_param: { dash: '', delim: ':=' }
+    - name: trajectorySmoothStoppingLength
+      label: trajectorySmoothStoppingLength
+      kind: num
+      v: 5.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: trajectorySmoothStoppingNumOfPoints
+      label: trajectorySmoothStoppingNumOfPoints
+      kind: num
+      v: 1000
+      cmd_param: { dash: '', delim: ':=' }
+    - name: trajectorySmoothStoppingSmoothnessFactor
+      label: trajectorySmoothStoppingSmoothnessFactor
+      kind: num
+      v: 2.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: thresholdDesiredLongPosition
+      label: thresholdDesiredLongPosition
+      kind: num
+      v: 5.0
+      cmd_param: { dash: '', delim: ':=' }
+    - name: samplingTimeHz
+      label: samplingTimeHz
+      kind: num
+      v: 100
+      cmd_param: { dash: '', delim: ':=' }
+    - name: queSize
+      label: queSize
+      kind: num
+      v: 10
+      cmd_param: { dash: '', delim: ':=' }
+    - name: optimalTrajectoryVelocityKeepingTopicName
+      label: optimalTrajectoryVelocityKeepingTopicName
+      kind: str
+      v: /velocity_keeping/trajectory_array_cartesian
+      cmd_param: { dash: '', delim: ':=' }
+    - name: optimalTrajectoryFollowingTopicName
+      label: optimalTrajectoryFollowingTopicName
+      kind: str
+      v: /stopping/trajectory_array_cartesian
+      cmd_param: { dash: '', delim: ':=' }
+    - name: optimalTrajectoryToMPCTopicName
+      label: optimalTrajectoryToMPCTopicName
+      kind: str
+      v: /optimal_path
+      cmd_param: { dash: '', delim: ':=' }
+    - name: optimalTrajectoryToFreneNodesTopicName
+      label: optimalTrajectoryToFreneNodesTopicName
+      kind: str
+      v: /trajectory_array_cartesian
+      cmd_param: { dash: '', delim: ':=' }
+    - name: previousOptimalTrajectoryTopicName
+      label: previousOptimalTrajectoryTopicName
+      kind: str
+      v: /trajectory_array_cartesian
+      cmd_param: { dash: '', delim: ':=' }

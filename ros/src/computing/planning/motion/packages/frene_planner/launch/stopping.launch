@@ -1,0 +1,80 @@
+<launch>
+	<!-- ARGUMENTS -->
+	<arg name="timeMinSec"	       default="2.5"	/> 
+	<arg name="timeMaxSec"	       default="2.6"	/> 
+	<arg name="timeDeltaSec"	       default="0.5"	 /> 		
+	<arg name="desiredLatPositionMeter"      default="0"	 /> 
+	<arg name="desiredLatPositionMinusMeter"    default="-3" /> 
+	<arg name="desiredLatPositionPlusMeter"     default="3"	 /> 
+	<arg name="desiredLatPositionDeltaMeter"    default="0.1"/> 
+	<arg name="desiredLongSpeedKmPerHour"      default="7.2"	 /> 
+	<arg name="desiredLongPositionMeter"    default="0"	     />
+	
+	<arg name="roadMarginRight"       default="4.5"	 />	
+	<arg name="roadMarginLeft"        default="0.5"	 />	
+	<arg name="maxCentrifugalForce"        default="1.5"	 />	
+	<arg name="maxAcceleration"        default="2.0"	 />
+	<arg name="maxCurvature"        default="20.0"	 />
+	<arg name="kjlong"    default="1"	     />
+	<arg name="ktlong"    default="1"	     />
+	<arg name="kplong"    default="200"    />
+	<arg name="kjlat"    default="1"	     />
+	<arg name="ktlat"    default="1"	     />
+	<arg name="kplat"    default="100"     />
+	<arg name="klong"    default="1"	     />
+	<arg name="klat"    default="1"	     />
+	<arg name="useOccupancyGridMap"    default="false" />
+	<arg name="collisionScalingFactorGammaMin"    default="1.0"	    />		
+	<arg name="collisionScalingFactorGammaMax"    default="1.0"	    />		
+	<arg name="collisionScalingFactorVMin"    default="0.0"	    />		
+	<arg name="collisionScalingFactorVMax"    default="100.0"	    />	
+	<arg name="carLength"    default="1.0"	     />
+	<arg name="carWidth"    default="1.0"	     />
+	<arg name="currentPoseTopicName" default="/filtered_ndt_current_pose"/>
+	<arg name="vehicleSpeedTopicName" default="/vehicle_speed"/>
+
+	<include file="$(find frene_planner)/launch/frene_base.launch" >
+		<arg name="group_name" value="stopping" />
+		<arg name="frene_mode" value="2" />
+
+		<arg name="timeMinSec"	       value="$(arg timeMinSec)"	/> 
+		<arg name="timeMaxSec"	       value="$(arg timeMaxSec)"	/> 
+		<arg name="timeDeltaSec"	       value="$(arg timeDeltaSec)"	 /> 		
+		<arg name="desiredLatPositionMeter"      value="$(arg desiredLatPositionMeter)"	 /> 
+		<arg name="desiredLatPositionMinusMeter"    value="$(arg desiredLatPositionMinusMeter)" /> 
+		<arg name="desiredLatPositionPlusMeter"     value="$(arg desiredLatPositionPlusMeter)"	 /> 
+		<arg name="desiredLatPositionDeltaMeter"    value="$(arg desiredLatPositionDeltaMeter)"/> 
+
+		<arg name="desiredLongSpeedKmPerHour"    value="$(arg desiredLongSpeedKmPerHour)"	     />
+		<arg name="desiredLongPositionMeter"    value="$(arg desiredLongPositionMeter)"	     />
+		
+		<arg name="roadMarginRight"       value="$(arg roadMarginRight)"	 />	
+		<arg name="roadMarginLeft"        value="$(arg roadMarginLeft)"	 	 />	
+		<arg name="maxCentrifugalForce"        value="$(arg maxCentrifugalForce)"/>	
+		<arg name="maxAcceleration"        value="$(arg maxAcceleration)"	 />
+		<arg name="maxCurvature"        value="$(arg maxCurvature)"	 	 />
+
+		<arg name="kjlong"    value="$(arg kjlong)" />
+		<arg name="ktlong"    value="$(arg ktlong)" />
+		<arg name="kplong"    value="$(arg kplong)" />
+		<arg name="kjlat"    value="$(arg kjlat)"   />
+		<arg name="ktlat"    value="$(arg ktlat)"   />  
+		<arg name="kplat"    value="$(arg kplat)"   />    
+		<arg name="klong"    value="$(arg klong)"   />      
+		<arg name="klat"    value="$(arg klat)"	    />
+
+		<arg name="useOccupancyGridMap"    value="$(arg useOccupancyGridMap)" />
+		<arg name="collisionScalingFactorGammaMin"    value="$(arg collisionScalingFactorGammaMin)"	    />		
+		<arg name="collisionScalingFactorGammaMax"    value="$(arg collisionScalingFactorGammaMax)"	    />		
+		<arg name="collisionScalingFactorVMin"    value="$(arg collisionScalingFactorVMin)"	    />		
+		<arg name="collisionScalingFactorVMax"    value="$(arg collisionScalingFactorVMax)"	    />	
+		<arg name="carLength"    value="$(arg carLength)"	    />	
+		<arg name="carWidth"    value="$(arg carWidth)"	    />	
+
+		<arg name="currentPoseTopicName" value="$(arg currentPoseTopicName)"/>
+		<arg name="vehicleSpeedTopicName" value="$(arg vehicleSpeedTopicName)"/>
+	</include>
+	
+</launch>
+
+

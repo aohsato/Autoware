@@ -1,0 +1,15 @@
+<launch>
+	<arg name="global_lane_topic_in" default="/global_plan" />
+	<arg name="laneTopicName" default="/target_lane_global" />
+	<arg name="samplingTimeHz" default="100" />
+	<arg name="queSize" default="10" />
+
+	<group ns="frene_planner_core">
+		<node pkg="lane_manager" type="path_lane_converter" name="path_lane_converter1">
+			<param name="pathTopicName" value="$(arg global_lane_topic_in)" />
+			<param name="laneTopicName" value="$(arg laneTopicName)" />
+			<param name="samplingTimeHz" value="$(arg samplingTimeHz)" type="int"/>
+			<param name="queSize" value="$(arg queSize)" type="int"/>
+		</node>
+	</group>
+</launch>
