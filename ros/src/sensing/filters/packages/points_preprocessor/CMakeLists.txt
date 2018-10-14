@@ -160,13 +160,20 @@ add_executable(compare_map_filter
 target_include_directories(compare_map_filter PRIVATE
         ${PCL_INCLUDE_DIRS}
         )
-
 target_link_libraries(compare_map_filter
         ${catkin_LIBRARIES}
         ${PCL_LIBRARIES}
         ${Qt5Core_LIBRARIES}
         )
+
 add_dependencies(compare_map_filter ${catkin_EXPORTED_TARGETS})
+
+if (OPENMP_FOUND)
+  set_target_properties(compare_map_filter PROPERTIES
+    COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
+    LINK_FLAGS ${OpenMP_CXX_FLAGS}
+  )
+endif ()
 
 ### Unit Tests ###
 #if (CATKIN_ENABLE_TESTING)
