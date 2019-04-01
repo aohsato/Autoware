@@ -50,7 +50,7 @@ PacmodInterface::PacmodInterface()
 
   // from autoware
   vehicle_cmd_sub_ = nh_.subscribe("vehicle_cmd", 1, &PacmodInterface::callbackVehicleCmd, this);
-  engage_cmd_sub_ = nh_.subscribe("as/engage", 1, &PacmodInterface::callbackEngage, this);
+  engage_cmd_sub_ = nh_.subscribe("vehicle/engage", 1, &PacmodInterface::callbackEngage, this);
 
   // from pacmod
   pacmod_enabled_sub_ = nh_.subscribe("pacmod/as_tx/enabled", 1, &PacmodInterface::callbackPacmodEnabled, this);
