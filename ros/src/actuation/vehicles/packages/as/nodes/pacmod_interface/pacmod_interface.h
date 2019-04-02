@@ -106,6 +106,9 @@ private:
   double pid_brake_kp_, pid_brake_ki_, pid_brake_kd_;
   double pid_throttle_max_, pid_brake_max_;
   double pid_brake_deadband_;
+  double table_accleration_kp_, table_accleration_ki_, table_accleration_kd_;
+  double table_speed_min_, table_speed_max_, table_accleration_min_, table_accleration_max_;
+  double table_throttle_max_, table_brake_max_;
   std::string speed_control_mode_str_;
   std::string throttle_table_path_;
   std::string brake_table_path_;
@@ -122,6 +125,7 @@ private:
 
   bool init_vehicle_cmd_;
   double current_speed_, current_steer_;
+  double desired_acceleration_;
   geometry_msgs::TwistStamped current_twist_;
   autoware_msgs::VehicleCmd vehicle_cmd_;
 

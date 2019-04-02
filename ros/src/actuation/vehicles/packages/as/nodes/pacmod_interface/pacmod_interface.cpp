@@ -42,6 +42,15 @@ PacmodInterface::PacmodInterface()
   private_nh_.param<double>("pid_brake_kd", pid_brake_kd_, 0.0);
   private_nh_.param<double>("pid_brake_max", pid_brake_max_, 0.5);
   private_nh_.param<double>("pid_brake_deadband", pid_brake_deadband_, 1.39);
+  private_nh_.param<double>("table_accleration_kp", table_accleration_kp_, 0.2);
+  private_nh_.param<double>("table_accleration_ki", table_accleration_ki_, 0.1);
+  private_nh_.param<double>("table_accleration_kd", table_accleration_kd_, 0.0);
+  private_nh_.param<double>("table_speed_min", table_speed_min_, 0.0);
+  private_nh_.param<double>("table_speed_max", table_speed_max_, 20.0);
+  private_nh_.param<double>("table_accleration_min", table_accleration_min_, -2.0);
+  private_nh_.param<double>("table_accleration_max", table_accleration_max_, 2.0);
+  private_nh_.param<double>("table_throttle_max", table_throttle_max_, 0.8);
+  private_nh_.param<double>("table_brake_max", table_brake_max_, 0.5);
   private_nh_.param<std::string>("speed_control_mode", speed_control_mode_str_, "table");
   private_nh_.param<std::string>("throttle_table_path", throttle_table_path_, "throttle.csv");
   private_nh_.param<std::string>("brake_table_path", brake_table_path_, "brake.csv");
@@ -57,8 +66,8 @@ PacmodInterface::PacmodInterface()
   else if (speed_control_mode_str_ == "table")
   {
     speed_control_mode_ = SpeedControlMode::TABLE;
-    acceleration_pid_.setGain(0.1, 0.0, 0.0);
-    acceleration_pid_.setMinMax(-1.0, 3.0);
+    acceleration_pid_.setGain(table_accleration_kp_, table_accleration_ki_, table_accleration_kd_);
+    acceleration_pid_.setMinMax(table_accleration_min_, table_accleration_max_);
     if (table_controller_.loadTables(throttle_table_path_, brake_table_path_))
     {
       ROS_ERROR("Loading tables is failed.");
@@ -192,9 +201,10 @@ void PacmodInterface::publishPacmodAccel(const autoware_msgs::VehicleCmd& msg)
   accel.clear_override = clear_override_;
   accel.clear_faults = clear_faults_;
 
+  error = msg.ctrl_cmd.linear_velocity - current_speed_;
+
   if (speed_control_mode_ == SpeedControlMode::PID)
   {
-    error = msg.ctrl_cmd.linear_velocity - current_speed_;
     if (error >= 0)
     {
       accel.command = throttle_pid_.update(error, 1.0 / loop_rate_);
@@ -207,12 +217,19 @@ void PacmodInterface::publishPacmodAccel(const autoware_msgs::VehicleCmd& msg)
   }
   else if (speed_control_mode_ == SpeedControlMode::TABLE)
   {
+    static double command = -1.0;
+    desired_acceleration_ = acceleration_pid_.update(error, 1.0 / loop_rate_);
+    if (table_controller_.getThrottle(current_speed_, desired_acceleration_, command))
+    {
+      accel.command = command;
+    }
   }
 
   pacmod_accel_pub_.publish(accel);
 
   ROS_INFO("ACCEL: target = %f, actual = %f, error = %f, command = %f", msg.ctrl_cmd.linear_velocity, current_speed_,
            error, accel.command);
+  ROS_ERROR("ACCELERATION = %f", desired_acceleration_);
 
   if (debug_)
   {
@@ -237,9 +254,10 @@ void PacmodInterface::publishPacmodBrake(const autoware_msgs::VehicleCmd& msg)
   brake.clear_override = clear_override_;
   brake.clear_faults = clear_faults_;
 
+  error = msg.ctrl_cmd.linear_velocity - current_speed_;
+
   if (speed_control_mode_ == SpeedControlMode::PID)
   {
-    error = msg.ctrl_cmd.linear_velocity - current_speed_;
     if (error < -pid_brake_deadband_)
     {
       brake.command = brake_pid_.update(-error, 1.0 / loop_rate_);
@@ -252,6 +270,11 @@ void PacmodInterface::publishPacmodBrake(const autoware_msgs::VehicleCmd& msg)
   }
   else if (speed_control_mode_ == SpeedControlMode::TABLE)
   {
+    static double command = -1.0;
+    if (table_controller_.getBrake(current_speed_, desired_acceleration_, command))
+    {
+      brake.command = command;
+    }
   }
 
   pacmod_brake_pub_.publish(brake);
