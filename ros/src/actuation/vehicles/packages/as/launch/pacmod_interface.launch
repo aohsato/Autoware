@@ -6,19 +6,6 @@
   <arg name="kvaser_circuit_id" default="0" />
   <arg name="pacmod_vehicle_type" default="LEXUS_RX_450H" />
 
-  <arg name="debug" default="true" />
-  <arg name="loop_rate" default="100.0" />
-  <arg name="accel_kp" default="0.2" />
-  <arg name="accel_ki" default="0.1" />
-  <arg name="accel_kd" default="0.0" />
-  <arg name="accel_max" default="0.3" />
-  <arg name="brake_kp" default="0.1" />
-  <arg name="brake_ki" default="0.1" />
-  <arg name="brake_kd" default="0.0" />
-  <arg name="brake_max" default="0.5" />
-  <arg name="brake_deadband" default="1.39" />
-  <arg name="rotation_rate" default="6.0" />
-
   <group ns="pacmod" if="$(arg use_pacmod)">
     <include file="$(find pacmod3)/launch/pacmod3.launch">
 			<arg name="use_kvaser" value="true" />
@@ -29,18 +16,14 @@
   </group>
 
 	<node pkg="as" type="pacmod_interface" name="pacmod_interface" output="screen">
-    <param name="debug" value="$(arg debug)" />
-    <param name="loop_rate" value="$(arg loop_rate)" />
-    <param name="accel_kp" value="$(arg accel_kp)" />
-    <param name="accel_ki" value="$(arg accel_ki)" />
-    <param name="accel_kd" value="$(arg accel_kd)" />
-    <param name="accel_max" value="$(arg accel_max)" />
-    <param name="brake_kp" value="$(arg brake_kp)" />
-    <param name="brake_ki" value="$(arg brake_ki)" />
-    <param name="brake_kd" value="$(arg brake_kd)" />
-    <param name="brake_max" value="$(arg brake_max)" />
-    <param name="brake_deadband" value="$(arg brake_deadband)" />
-    <param name="rotation_rate" value="$(arg rotation_rate)" />
+    <rosparam command="load" file="$(find as)/config/pacmod_interface.yaml" />
+    <param name="throttle_table_path" value="$(find as)/config/lexus_throttle.csv" />
+    <param name="brake_table_path" value="$(find as)/config/lexus_brake.csv" />
+    <remap from="pacmod/as_rx/steer_cmd" to= "psc/pacmod/as_rx/steer_cmd" />
+    <remap from="pacmod/as_rx/accel_cmd" to= "psc/pacmod/as_rx/accel_cmd" />
+    <remap from="pacmod/as_rx/brake_cmd" to= "psc/pacmod/as_rx/brake_cmd" />
+    <remap from="pacmod/as_rx/shift_cmd" to= "psc/pacmod/as_rx/shift_cmd" />
+    <remap from="pacmod/as_rx/turn_cmd" to= "psc/pacmod/as_rx/turn_cmd" />
 	</node>
 
 </launch>

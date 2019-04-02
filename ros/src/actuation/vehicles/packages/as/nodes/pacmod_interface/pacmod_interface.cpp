@@ -40,13 +40,39 @@ PacmodInterface::PacmodInterface()
   private_nh_.param<double>("brake_max", brake_max_, 0.5);
   private_nh_.param<double>("brake_deadband", brake_deadband_, 1.39);
   private_nh_.param<double>("rotation_rate", rotation_rate_, 6.0);
+  private_nh_.param<std::string>("speed_control_mode", speed_control_mode_str_, "table");
+  private_nh_.param<std::string>("throttle_table_path", throttle_table_path_, "throttle.csv");
+  private_nh_.param<std::string>("brake_table_path", brake_table_path_, "brake.csv");
+
+  if (speed_control_mode_str_ == "pid")
+  {
+    speed_control_mode_ = SpeedControlMode::PID;
+
+    accel_pid_.setGain(accel_kp_, accel_ki_, accel_kd_);
+    brake_pid_.setGain(brake_kp_, brake_ki_, brake_kd_);
+    accel_pid_.setMinMax(0.0, accel_max_);
+    brake_pid_.setMinMax(0.0, brake_max_);
+  }
+  else if (speed_control_mode_str_ == "table")
+  {
+    speed_control_mode_ = SpeedControlMode::TABLE;
+    acceleration_pid_.setGain(0.1, 0.0, 0.0);
+    acceleration_pid_.setMinMax(0.0, 3.0);
+    if (table_controller_.loadTables(throttle_table_path_, brake_table_path_))
+    {
+      ROS_ERROR("Loading tables is failed.");
+      ros::shutdown();
+    }
+    std::cout << table_controller_.getThrottle(1.0, 0.3) << std::endl;
+    std::cout << table_controller_.getBrake(2.0, -0.5) << std::endl;
+  }
+  else
+  {
+    ROS_ERROR("'%s' is not supported speed control mode.", speed_control_mode_str_.c_str());
+    ros::shutdown();
+  }
 
   rate_ = new ros::Rate(loop_rate_);
-
-  accel_pid_.setGain(accel_kp_, accel_ki_, accel_kd_);
-  brake_pid_.setGain(brake_kp_, brake_ki_, brake_kd_);
-  accel_pid_.setMinMax(0.0, accel_max_);
-  brake_pid_.setMinMax(0.0, brake_max_);
 
   // from autoware
   vehicle_cmd_sub_ = nh_.subscribe("vehicle_cmd", 1, &PacmodInterface::callbackVehicleCmd, this);
@@ -82,7 +108,6 @@ PacmodInterface::PacmodInterface()
     debug_accel_pub_ = private_nh_.advertise<std_msgs::Float32MultiArray>("debug/accel", 10);
     debug_brake_pub_ = private_nh_.advertise<std_msgs::Float32MultiArray>("debug/brake", 10);
   }
-
 }
 
 PacmodInterface::~PacmodInterface()
@@ -141,6 +166,7 @@ void PacmodInterface::publishPacmodSteer(const autoware_msgs::VehicleCmd& msg)
   static pacmod_msgs::SteerSystemCmd steer;
 
   steer.header = msg.header;
+  steer.header.stamp = ros::Time::now();
   steer.enable = enable_;
   steer.ignore_overrides = ignore_overrides_;
   steer.clear_override = clear_override_;
@@ -152,7 +178,7 @@ void PacmodInterface::publishPacmodSteer(const autoware_msgs::VehicleCmd& msg)
 
   pacmod_steer_pub_.publish(steer);
 
-  ROS_INFO("STEER: target = %f, command = %f", msg.ctrl_cmd.steering_angle, steer.command);
+  ROS_INFO("STEER: target = %f, actual = %f, command = %f", msg.ctrl_cmd.steering_angle, current_steer_, steer.command);
 }
 
 void PacmodInterface::publishPacmodAccel(const autoware_msgs::VehicleCmd& msg)
@@ -161,20 +187,27 @@ void PacmodInterface::publishPacmodAccel(const autoware_msgs::VehicleCmd& msg)
   static double error;
 
   accel.header = msg.header;
+  accel.header.stamp = ros::Time::now();
   accel.enable = enable_;
   accel.ignore_overrides = ignore_overrides_;
   accel.clear_override = clear_override_;
   accel.clear_faults = clear_faults_;
 
-  error = msg.ctrl_cmd.linear_velocity - current_speed_;
-  if (error >= 0)
+  if (speed_control_mode_ == SpeedControlMode::PID)
   {
-    accel.command = accel_pid_.update(error, 1.0 / loop_rate_);
+    error = msg.ctrl_cmd.linear_velocity - current_speed_;
+    if (error >= 0)
+    {
+      accel.command = accel_pid_.update(error, 1.0 / loop_rate_);
+    }
+    else
+    {
+      accel_pid_.reset();
+      accel.command = 0.0;
+    }
   }
-  else
+  else if (speed_control_mode_ == SpeedControlMode::TABLE)
   {
-    accel_pid_.reset();
-    accel.command = 0.0;
   }
 
   pacmod_accel_pub_.publish(accel);
@@ -185,10 +218,10 @@ void PacmodInterface::publishPacmodAccel(const autoware_msgs::VehicleCmd& msg)
   if (debug_)
   {
     std_msgs::Float32MultiArray debug;
-    debug.data.push_back(msg.ctrl_cmd.linear_velocity); // target [m/s]
-    debug.data.push_back(current_speed_);               // actual [m/s]
-    debug.data.push_back(error);                        // error [m/s]
-    debug.data.push_back(accel.command);                // command [-]
+    debug.data.push_back(msg.ctrl_cmd.linear_velocity);  // target [m/s]
+    debug.data.push_back(current_speed_);                // actual [m/s]
+    debug.data.push_back(error);                         // error [m/s]
+    debug.data.push_back(accel.command);                 // command [-]
     debug_accel_pub_.publish(debug);
   }
 }
@@ -199,20 +232,27 @@ void PacmodInterface::publishPacmodBrake(const autoware_msgs::VehicleCmd& msg)
   static double error;
 
   brake.header = msg.header;
+  brake.header.stamp = ros::Time::now();
   brake.enable = enable_;
   brake.ignore_overrides = ignore_overrides_;
   brake.clear_override = clear_override_;
   brake.clear_faults = clear_faults_;
 
-  error = msg.ctrl_cmd.linear_velocity - current_speed_;
-  if (error < -brake_deadband_)
+  if (speed_control_mode_ == SpeedControlMode::PID)
   {
-    brake.command = brake_pid_.update(-error, 1.0 / loop_rate_);
+    error = msg.ctrl_cmd.linear_velocity - current_speed_;
+    if (error < -brake_deadband_)
+    {
+      brake.command = brake_pid_.update(-error, 1.0 / loop_rate_);
+    }
+    else
+    {
+      brake_pid_.reset();
+      brake.command = 0.0;
+    }
   }
-  else
+  else if (speed_control_mode_ == SpeedControlMode::TABLE)
   {
-    brake_pid_.reset();
-    brake.command = 0.0;
   }
 
   pacmod_brake_pub_.publish(brake);
@@ -223,10 +263,10 @@ void PacmodInterface::publishPacmodBrake(const autoware_msgs::VehicleCmd& msg)
   if (debug_)
   {
     std_msgs::Float32MultiArray debug;
-    debug.data.push_back(msg.ctrl_cmd.linear_velocity); // target [m/s]
-    debug.data.push_back(current_speed_);               // actual [m/s]
-    debug.data.push_back(error);                        // error [m/s]
-    debug.data.push_back(brake.command);                // command [-]
+    debug.data.push_back(msg.ctrl_cmd.linear_velocity);  // target [m/s]
+    debug.data.push_back(current_speed_);                // actual [m/s]
+    debug.data.push_back(error);                         // error [m/s]
+    debug.data.push_back(brake.command);                 // command [-]
     debug_brake_pub_.publish(debug);
   }
 }
@@ -236,6 +276,7 @@ void PacmodInterface::publishPacmodShift(const autoware_msgs::VehicleCmd& msg)
   static pacmod_msgs::SystemCmdInt shift;
 
   shift.header = msg.header;
+  shift.header.stamp = ros::Time::now();
   shift.enable = enable_;
   shift.ignore_overrides = ignore_overrides_;
   shift.clear_override = clear_override_;
@@ -266,6 +307,7 @@ void PacmodInterface::publishPacmodTurn(const autoware_msgs::VehicleCmd& msg)
   static pacmod_msgs::SystemCmdInt turn;
 
   turn.header = msg.header;
+  turn.header.stamp = ros::Time::now();
   turn.enable = enable_;
   turn.ignore_overrides = ignore_overrides_;
   turn.clear_override = clear_override_;

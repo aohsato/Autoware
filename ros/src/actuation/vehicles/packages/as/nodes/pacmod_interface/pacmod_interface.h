@@ -37,6 +37,7 @@
 #include <pacmod_msgs/WheelSpeedRpt.h>
 
 #include "pid_controller.h"
+#include "table_controller.h"
 
 // Lexus 450hL parameters
 const static double WHEEL_BASE = 2.79;               // [m]
@@ -45,6 +46,12 @@ const static double MAX_STEERING_WHEEL_ANGLE = 8.6;  // [rad]
 const static double STEERING_GEAR_RATIO              // [-]
   = MAX_STEERING_WHEEL_ANGLE / std::asin(WHEEL_BASE / MINIMUM_TURNING_RADIUS);
 const static double TIRE_RADIUS = 0.77 / 2.0;        // [m]
+
+typedef enum SPEED_CONTROL_MODE
+{
+  PID = 0,
+  TABLE = 1,
+} SpeedControlMode;
 
 class PacmodInterface
 {
@@ -99,8 +106,12 @@ private:
   double accel_max_, brake_max_;
   double brake_deadband_;
   double rotation_rate_;
+  std::string speed_control_mode_str_;
+  std::string throttle_table_path_;
+  std::string brake_table_path_;
 
   // variables
+  SpeedControlMode speed_control_mode_;
   bool engage_cmd_, prev_engage_cmd_;
   bool engage_state_, prev_engage_state_;
 
@@ -124,6 +135,8 @@ private:
 
   PIDController accel_pid_;
   PIDController brake_pid_;
+  PIDController acceleration_pid_;
+  TableController table_controller_;
 
   // callbacks from autoware
   void callbackVehicleCmd(const autoware_msgs::VehicleCmd::ConstPtr& msg);
