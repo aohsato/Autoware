@@ -101,11 +101,11 @@ private:
   // rosparams
   bool debug_;
   double loop_rate_;
-  double accel_kp_, accel_ki_, accel_kd_;
-  double brake_kp_, brake_ki_, brake_kd_;
-  double accel_max_, brake_max_;
-  double brake_deadband_;
   double rotation_rate_;
+  double pid_throttle_kp_, pid_throttle_ki_, pid_throttle_kd_;
+  double pid_brake_kp_, pid_brake_ki_, pid_brake_kd_;
+  double pid_throttle_max_, pid_brake_max_;
+  double pid_brake_deadband_;
   std::string speed_control_mode_str_;
   std::string throttle_table_path_;
   std::string brake_table_path_;
@@ -133,7 +133,7 @@ private:
 
   ros::Rate* rate_;
 
-  PIDController accel_pid_;
+  PIDController throttle_pid_;
   PIDController brake_pid_;
   PIDController acceleration_pid_;
   TableController table_controller_;

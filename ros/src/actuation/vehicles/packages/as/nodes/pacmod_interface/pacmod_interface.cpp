@@ -16,6 +16,8 @@
 
 #include "pacmod_interface.h"
 
+#include <fstream>
+
 PacmodInterface::PacmodInterface()
   : nh_()
   , private_nh_("~")
@@ -30,16 +32,16 @@ PacmodInterface::PacmodInterface()
 {
   private_nh_.param<bool>("debug", debug_, false);
   private_nh_.param<double>("loop_rate", loop_rate_, 100.0);
-  private_nh_.param<double>("accel_kp", accel_kp_, 0.2);
-  private_nh_.param<double>("accel_ki", accel_ki_, 0.1);
-  private_nh_.param<double>("accel_kd", accel_kd_, 0.0);
-  private_nh_.param<double>("accel_max", accel_max_, 0.3);
-  private_nh_.param<double>("brake_kp", brake_kp_, 0.1);
-  private_nh_.param<double>("brake_ki", brake_ki_, 0.1);
-  private_nh_.param<double>("brake_kd", brake_kd_, 0.0);
-  private_nh_.param<double>("brake_max", brake_max_, 0.5);
-  private_nh_.param<double>("brake_deadband", brake_deadband_, 1.39);
   private_nh_.param<double>("rotation_rate", rotation_rate_, 6.0);
+  private_nh_.param<double>("pid_throttle_kp", pid_throttle_kp_, 0.2);
+  private_nh_.param<double>("pid_throttle_ki", pid_throttle_ki_, 0.1);
+  private_nh_.param<double>("pid_throttle_kd", pid_throttle_kd_, 0.0);
+  private_nh_.param<double>("pid_throttle_max", pid_throttle_max_, 0.3);
+  private_nh_.param<double>("pid_brake_kp", pid_brake_kp_, 0.1);
+  private_nh_.param<double>("pid_brake_ki", pid_brake_ki_, 0.1);
+  private_nh_.param<double>("pid_brake_kd", pid_brake_kd_, 0.0);
+  private_nh_.param<double>("pid_brake_max", pid_brake_max_, 0.5);
+  private_nh_.param<double>("pid_brake_deadband", pid_brake_deadband_, 1.39);
   private_nh_.param<std::string>("speed_control_mode", speed_control_mode_str_, "table");
   private_nh_.param<std::string>("throttle_table_path", throttle_table_path_, "throttle.csv");
   private_nh_.param<std::string>("brake_table_path", brake_table_path_, "brake.csv");
@@ -47,24 +49,21 @@ PacmodInterface::PacmodInterface()
   if (speed_control_mode_str_ == "pid")
   {
     speed_control_mode_ = SpeedControlMode::PID;
-
-    accel_pid_.setGain(accel_kp_, accel_ki_, accel_kd_);
-    brake_pid_.setGain(brake_kp_, brake_ki_, brake_kd_);
-    accel_pid_.setMinMax(0.0, accel_max_);
-    brake_pid_.setMinMax(0.0, brake_max_);
+    throttle_pid_.setGain(pid_throttle_kp_, pid_throttle_ki_, pid_throttle_kd_);
+    brake_pid_.setGain(pid_brake_kp_, pid_brake_ki_, pid_brake_kd_);
+    throttle_pid_.setMinMax(0.0, pid_throttle_max_);
+    brake_pid_.setMinMax(0.0, pid_brake_max_);
   }
   else if (speed_control_mode_str_ == "table")
   {
     speed_control_mode_ = SpeedControlMode::TABLE;
     acceleration_pid_.setGain(0.1, 0.0, 0.0);
-    acceleration_pid_.setMinMax(0.0, 3.0);
+    acceleration_pid_.setMinMax(-1.0, 3.0);
     if (table_controller_.loadTables(throttle_table_path_, brake_table_path_))
     {
       ROS_ERROR("Loading tables is failed.");
       ros::shutdown();
     }
-    std::cout << table_controller_.getThrottle(1.0, 0.3) << std::endl;
-    std::cout << table_controller_.getBrake(2.0, -0.5) << std::endl;
   }
   else
   {
@@ -198,11 +197,11 @@ void PacmodInterface::publishPacmodAccel(const autoware_msgs::VehicleCmd& msg)
     error = msg.ctrl_cmd.linear_velocity - current_speed_;
     if (error >= 0)
     {
-      accel.command = accel_pid_.update(error, 1.0 / loop_rate_);
+      accel.command = throttle_pid_.update(error, 1.0 / loop_rate_);
     }
     else
     {
-      accel_pid_.reset();
+      throttle_pid_.reset();
       accel.command = 0.0;
     }
   }
@@ -241,7 +240,7 @@ void PacmodInterface::publishPacmodBrake(const autoware_msgs::VehicleCmd& msg)
   if (speed_control_mode_ == SpeedControlMode::PID)
   {
     error = msg.ctrl_cmd.linear_velocity - current_speed_;
-    if (error < -brake_deadband_)
+    if (error < -pid_brake_deadband_)
     {
       brake.command = brake_pid_.update(-error, 1.0 / loop_rate_);
     }

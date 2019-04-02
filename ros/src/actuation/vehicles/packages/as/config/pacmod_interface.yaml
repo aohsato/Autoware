@@ -1,12 +1,33 @@
+## Enable publisher for debug
 debug: true
+
+## Control frequency
 loop_rate: 100.0
-accel_kp: 0.0
-accel_ki: 0.1
-accel_kd: 0.0
-accel_max: 0.3
-brake_kp: 0.1
-brake_ki: 0.1
-brake_kd: 0.0
-brake_max: 0.5
-brake_deadband: 1.39
+
+## Steering controller
 rotation_rate: 6.0
+
+## Speed control mode
+speed_control_mode : "table"
+
+# PID based speed controller
+pid_throttle_max: 0.3
+pid_throttle_kp: 0.2
+pid_throttle_ki: 0.1
+pid_throttle_kd: 0.0
+pid_brake_max: 0.5
+pid_brake_kp: 0.1
+pid_brake_ki: 0.1
+pid_brake_kd: 0.0
+pid_brake_deadband: 1.39
+
+# Table based speed controller
+table_accleration_kp: 0.2
+table_accleration_ki: 0.1
+table_accleration_kd: 0.0
+table_speed_min: 0.0
+table_speed_max: 20.0
+table_accleration_min: -2.0
+table_accleration_max: 2.0
+table_throttle_max: 0.8
+table_brake_max: 0.5
