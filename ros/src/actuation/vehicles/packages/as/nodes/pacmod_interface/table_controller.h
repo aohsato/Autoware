@@ -24,9 +24,23 @@
 class Table
 {
 private:
+  // table[speed_index][accleration_index] = command
   std::vector<std::vector<double>> table_;
+  const double CMIN = 0.0, CMAX = 1.0;
   const double smin_, smax_, ds_;
   const double amin_, amax_, da_;
+  bool validS(const double& s)
+  {
+    return (smin_ <= s && s <= smax_);
+  }
+  bool validA(const double& a)
+  {
+    return (amin_ <= a && a <= amax_);
+  }
+  bool validC(const double& c)
+  {
+    return (CMIN <= c && c <= CMAX);
+  }
   unsigned int getSI(const double& s)
   {
     return (unsigned int)(std::fabs(s - smin_) / ds_);
@@ -47,22 +61,49 @@ public:
       ts.resize(getAI(amax) + 1);
       for (auto& ta : ts)
       {
-        ta = std::numeric_limits<double>::max();
+        ta = -1.0;
       }
     }
   }
-  void setCommand(const double& c, const double& s, const double& a)
+
+  bool setCommand(const double& s, const double& a, const double& c)
   {
-    table_[getSI(s)][getAI(a)] = c;
+    if (validS(s) && validA(a) && validC(c))
+    {
+      table_[getSI(s)][getAI(a)] = c;
+      return true;
+    }
+    else
+    {
+      return false;
+    }
   }
-  double getCommand(const double& s, const double& a)
+  bool getCommand(const double& s, const double& a, double& c)
   {
-    return table_[getSI(s)][getAI(a)];
+    if (validS(s) && validA(a))
+    {
+      double x = table_[getSI(s)][getAI(a)];
+      if (validC(x))
+      {
+        c = x;
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    }
+    else
+    {
+      return false;
+    }
   }
 };
 
 class TableController
 {
+private:
+  std::shared_ptr<Table> th_table_, br_table_;
 public:
   TableController()
   {
@@ -76,8 +117,9 @@ public:
       return false;
     }
 
-    std::string buf;
+    // command, speed, acceleration
     std::vector<std::vector<double>> csa(3);
+    std::string buf;
     for (size_t row = 0; getline(ifs, buf); ++row)
     {
       if (row == 0)
@@ -106,7 +148,7 @@ public:
 
     for (size_t col = 0; col < csa[0].size(); col++)
     {
-      table->setCommand(csa[0][col], csa[1][col], csa[2][col]);
+      table->setCommand(csa[1][col], csa[2][col], csa[0][col]);
     }
 
     return true;
@@ -120,19 +162,15 @@ public:
     }
   }
 
-  double getThrottle(const double& speed, const double& acceleration)
+  bool getThrottle(const double& speed, const double& acceleration, double& throttle)
   {
-    return th_table_->getCommand(speed, acceleration);
+    return th_table_->getCommand(speed, acceleration, throttle);
   }
 
-  double getBrake(const double& speed, const double& acceleration)
+  bool getBrake(const double& speed, const double& acceleration, double& brake)
   {
-    return br_table_->getCommand(speed, acceleration);
+    return br_table_->getCommand(speed, acceleration, brake);
   }
-
-private:
-  // table[speed_index][accleration_index] = throttle or brake
-  std::shared_ptr<Table> th_table_, br_table_;
 };
 
 #endif  // TABLE_CONTROLLER_H
